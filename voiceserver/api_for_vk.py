@@ -1,13 +1,20 @@
 import vk_api
+import json
 
 
 class GetVkApi(object):
-    def __init__(self, domain='great.food', query=None, count=None):
+    def __init__(self, domain=None, query=None, count=None):
         self.login = GetVkApi._get_auth_from_file()[0]
         self.password = GetVkApi._get_auth_from_file()[1]
         self.domain = domain
         self.query = query
         self.count = count
+
+    @staticmethod
+    def _get_domain_list():
+        with open('subfile.json') as subfile:
+            domains = json.load(subfile)
+        return domains['domains']
 
     @staticmethod
     def _get_vk_session(self):
@@ -23,13 +30,21 @@ class GetVkApi(object):
 
     def search_recipes(self):
         vk = self._get_vk_session(self)
-        response = vk.wall.search(domain=self.domain, query=self.query, count=self.count)
-
-        if response['items']:
-            return response['items']
+        domains = self._get_domain_list()
+        recipes = []
+        for domain in domains:
+            response = vk.wall.search(domain=domain, query=self.query, count=self.count)
+            if response['items']:
+                text_recipes = response['items']
+                recipes.append(text_recipes)
+            else:
+                return 'error'
+        return recipes
 
     @staticmethod
     def _get_auth_from_file():
-        f_auth = open('vk_auth.l', 'r')
-        login, password = f_auth.read().split('\n')
+        with open('subfile.json') as subfile:
+            auth_log_pass = json.load(subfile)
+        login = auth_log_pass['vk_auth']['login']
+        password = auth_log_pass['vk_auth']['password']
         return login, password
