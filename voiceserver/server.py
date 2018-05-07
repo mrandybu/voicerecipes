@@ -1,4 +1,4 @@
-from voiceserver.api_for_vk import GetVkApi
+from voiceserver.server_funcs import FakeServer
 from flask import Flask
 
 
@@ -7,9 +7,8 @@ class Server(object):
         self.query = query
 
     def request_to_vk(self):
-        new_request = GetVkApi(query=self.query, count=10)
-        response = new_request.search_recipes()
-        return response
+        new_request = FakeServer(self.query)
+        return new_request
 
 
 app = Flask(__name__)
