@@ -15,14 +15,14 @@ class Server(object):
 app = Flask(__name__)
 
 
-@app.route('/recipes/<name>')
-def get_request(name=None):
-    request_to_server = Server(name)
+@app.route('/recipes/<recipe_name>')
+def get_request(recipe_name=None):
+    request_to_server = Server(recipe_name)
     response = request_to_server.request_to_vk()
     recipes_list = []
     for domain in response:
-        for recipes in domain:
-            recipes_list.append(recipes['text'] + '/split/')
+        for recipe in domain:
+            recipes_list.append(recipe['text'])
     recipes_list_to_str = str(recipes_list)
     return recipes_list_to_str
 
