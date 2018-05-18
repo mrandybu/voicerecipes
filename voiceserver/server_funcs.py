@@ -57,11 +57,9 @@ class ServerFunctions(object):
         list_len = len(title_list)
         for count in range(0, list_len):
             recipes_content_dict[count] = {
-                count: {
                     'title': title_list[count],
                     'ing': recipes_untitle[count][0],
                     'cook': recipes_untitle[count][1]
-                }
             }
         recipe_content_json = json.dumps(
             recipes_content_dict,
