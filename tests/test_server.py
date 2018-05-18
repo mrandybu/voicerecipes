@@ -3,14 +3,14 @@ from voiceserver.api_for_vk import GetVkApi
 
 
 def test_vk_api():
-    query = ''.encode('utf-8')
+    query = 'каша'.encode('utf-8')
     new_request = GetVkApi(query=query, count=10)
     response = new_request.search_recipes()
     print(response)
 
 
 def test_local_server():
-    name = 'блины'
+    name = 'каша'
     url = 'http://127.0.0.1:5000/recipes/'
     query = url + name
     new_request = requests.get(query)
@@ -24,7 +24,7 @@ def test_local_server():
 def test_remote_server():
     with open('subfile.json') as subfile:
         server_host = json.load(subfile)
-    query = 'fish'.encode('utf-8')
+    query = 'каша'.encode('utf-8')
     new_request = requests.post(server_host['server'], query)
     if new_request.ok:
         response = new_request.text

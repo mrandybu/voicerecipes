@@ -1,5 +1,5 @@
 from flask import Flask
-from voiceserver.server_func import ServerFunctions
+from voiceserver.server_funcs import ServerFunctions
 
 
 class Server(object):
