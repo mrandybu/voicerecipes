@@ -1,5 +1,5 @@
-from voiceserver.server_funcs import FakeServer
 from flask import Flask
+from voiceserver.server_func import ServerFunctions
 
 
 class Server(object):
@@ -7,8 +7,9 @@ class Server(object):
         self.query = query
 
     def request_to_vk(self):
-        new_request = FakeServer(self.query)
-        return new_request
+        get_server = ServerFunctions(self.query)
+        recipes_list = get_server.preprocessing_recipe_text()
+        return recipes_list
 
 
 app = Flask(__name__)
@@ -16,14 +17,8 @@ app = Flask(__name__)
 
 @app.route('/recipes/<recipe_name>')
 def get_request(recipe_name=None):
-    request_to_server = Server(recipe_name)
-    response = request_to_server.request_to_vk()
-    recipes_list = []
-    for domain in response:
-        for recipe in domain:
-            recipes_list.append(recipe['text'])
-    recipes_list_to_str = str(recipes_list)
-    return recipes_list_to_str
+    server = Server(recipe_name)
+    return server.request_to_vk()
 
 
 if __name__ == '__main__':
