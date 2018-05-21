@@ -4,7 +4,7 @@ import json
 
 
 class ServerFunctions(object):
-    def __init__(self, query, keywords=None):
+    def __init__(self, query):
         self.query = query
         self.keywords = re.compile(
             'Состав:|СОСТАВ:|'
@@ -36,7 +36,7 @@ class ServerFunctions(object):
         return list(set(list_no_dupl))
 
     def _get_recipe_title(self, recipes_list):
-        reg = re.compile('^[А-ЯЁЙ].[а-яё,\-\s]+')
+        reg = re.compile('^[А-ЯЁЙ].[а-яё,\-\s\d]+')
         recipes_title = []
         for recipe in recipes_list:
             recipe_title = re.findall(reg, recipe)
@@ -57,9 +57,9 @@ class ServerFunctions(object):
         list_len = len(title_list)
         for count in range(0, list_len):
             recipes_content_dict[count] = {
-                    'title': title_list[count],
-                    'ing': recipes_untitle[count][0],
-                    'cook': recipes_untitle[count][1]
+                'title': title_list[count],
+                'ing': recipes_untitle[count][0],
+                'cook': recipes_untitle[count][1]
             }
         recipe_content_json = json.dumps(
             recipes_content_dict,
@@ -67,6 +67,24 @@ class ServerFunctions(object):
             indent=3
         )
         return recipe_content_json
+
+    def _parse_to_json_list(self, title_list, recipes_list):
+        recipes_untitle = []
+        for recipe in recipes_list:
+            recipe_content = re.split(self.keywords, recipe)
+            recipes_untitle.append([recipe_content[1], recipe_content[2]])
+        json_list = []
+        list_len = len(title_list)
+        for count in range(0, list_len):
+            json_list.append(
+                {
+                    'id': count,
+                    'title': title_list[count],
+                    'ing': recipes_untitle[count][0],
+                    'cook': recipes_untitle[count][1]
+                }
+            )
+        return json_list
 
     def preprocessing_recipe_text(self):
         recipes_list_text = self._get_recipes()
@@ -78,7 +96,7 @@ class ServerFunctions(object):
             processed_list.append(''.join(cleaned_text))
         checked_list = self._check_recipe(processed_list)
         title_list = self._get_recipe_title(checked_list)
-        json_recipes = self._parse_to_json(title_list, checked_list)
+        json_recipes = self._parse_to_json_list(title_list, checked_list)
         return str(json_recipes)
 
     def _get_recipes(self):
