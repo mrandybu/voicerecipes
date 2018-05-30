@@ -1,6 +1,8 @@
-import requests, json, os, sys
+import requests
+import json
 from voiceserver.api_for_vk import GetVkApi
 import __root__
+
 
 def test_vk_api():
     query = 'каша'.encode('utf-8')
@@ -10,22 +12,22 @@ def test_vk_api():
 
 
 def test_local_server():
-    http_request = 'recipes/каша'
+    http_request = 'recipes/рыба'
     url = 'http://127.0.0.1:5000/'
-    query = url + name
+    query = url + http_request
     new_request = requests.get(query)
     if new_request.ok:
         response = new_request.text
-        print(response)
+        #print(response)
     else:
         print('error of request')
 
 
 def test_remote_server():
     subfile = __root__.get_root_path_to_file('subfile.json')
-    with open(subfile) as subfile:
-        server_host = (json.load(subfile))['server']
-    http_request = 'recipes/каша'
+    with open(subfile) as sbf:
+        server_host = (json.load(sbf))['server']
+    http_request = 'recipes/рыба'
     query = server_host + http_request
     new_request = requests.get(query)
     if new_request.ok:
@@ -36,6 +38,6 @@ def test_remote_server():
 
 
 if __name__ == '__main__':
-    test_remote_server()
-    # test_local_server()
+    # test_remote_server()
+    test_local_server()
     # test_vk_api()
