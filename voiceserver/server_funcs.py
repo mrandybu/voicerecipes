@@ -39,7 +39,7 @@ class ServerFunctions(object):
         return list(set(list_no_dupl))
 
     def _get_recipe_title(self, recipes_list):
-        reg = re.compile('^[А-ЯЁЙ].[а-яё,\-\s]+')
+        reg = re.compile('^[А-ЯЁЙ].[а-яё,\-\s\d]+')
         recipes_title = []
         for recipe in recipes_list:
             recipe_title = re.findall(reg, recipe)
@@ -76,8 +76,9 @@ class ServerFunctions(object):
         for recipe in recipes_list:
             recipe_content = re.split(self.keywords, recipe)
             recipes_untitle.append([recipe_content[1], recipe_content[2]])
-        list_len = len(title_list)
+
         json_list = []
+        list_len = len(title_list)
         for count in range(0, list_len):
             json_list.append(
                 {
