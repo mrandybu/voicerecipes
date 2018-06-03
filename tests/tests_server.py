@@ -1,6 +1,5 @@
 import requests
 import json
-import sys
 from voiceserver.api_for_vk import GetVkApi
 import __root__
 
