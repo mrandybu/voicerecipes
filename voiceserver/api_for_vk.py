@@ -34,11 +34,9 @@ class GetVkApi(object):
         recipes = []
         for domain in domains:
             response = vk.wall.search(domain=domain, query=self.query, count=self.count)
-            if response['items']:
+            if len(response['items']) != 0:
                 text_recipes = response['items']
                 recipes.append(text_recipes)
-            else:
-                return 'error'
         return recipes
 
     def _get_auth_from_file(self):

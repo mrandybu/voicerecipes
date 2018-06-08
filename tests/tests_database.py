@@ -3,6 +3,7 @@ import json
 from database.orm_db import User
 import os
 import __root__
+from voiceserver.server import Server
 
 
 class TestDataBase(object):
@@ -12,7 +13,7 @@ class TestDataBase(object):
         self.reg_data = {
             'login': 'test',
             'password': 'test123',
-            'email': 'test@test.com'
+            'email': 'your@email.com'
         }
         self.test_type = test_type
 
@@ -27,10 +28,20 @@ class TestDataBase(object):
         return 'Remote server error!'
 
     def test_local_registration(self):
-        req = requests.post('http://127.0.0.1:5000/checkin', json.dumps(self.reg_data))
+        req = requests.post('http://127.0.0.1:5000/checkin',
+                            json.dumps(self.reg_data))
         if req.ok:
             return req.text
-        return 'Local server error!'
+        return req.text
+
+    def test_send_code_local(self):
+        reg_data = json.dumps(self.reg_data)
+        Server(reg_data=reg_data)
+        req = requests.get('http://127.0.0.1:5000/sendcode/{}/{}'
+                           .format(self.reg_data['email'], '1331'))
+        if req.ok:
+            return req.text
+        return 'Error method!'
 
     @staticmethod
     def get_all_data():
@@ -40,13 +51,14 @@ class TestDataBase(object):
         tests_kit = {
             'remreg': self.test_remote_registration,
             'locreg': self.test_local_registration,
-            'alldata': self.get_all_data
+            'alldata': self.get_all_data,
+            'sendcode': self.test_send_code_local
         }
         return tests_kit[self.test_type]()
 
 
 def init_test():
-    test = TestDataBase('alldata')
+    test = TestDataBase('sendcode')
     return test.get_test()
 
 

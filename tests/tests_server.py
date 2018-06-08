@@ -49,7 +49,7 @@ class TestsSever(object):
 
 
 def init_test():
-    test = TestsSever('locserv', 'рыба')
+    test = TestsSever('locserv', 'пирог')
     test.get_test()
 
 
