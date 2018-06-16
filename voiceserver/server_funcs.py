@@ -7,9 +7,12 @@ class ServerFunctions(object):
     def __init__(self, query):
         self.query = query
         self.keywords = re.compile(
-            'Состав:|СОСТАВ:|'
-            'Ингредиенты:|ИНГРЕДИЕНТЫ:|'
-            'Приготовление:|ПРИГОТОВЛЕНИЕ:'
+            'Состав|СОСТАВ|'
+            'Ингредиенты|ИНГРЕДИЕНТЫ|'
+            'Приготовление|ПРИГОТОВЛЕНИЕ|'
+            'Сложность|СЛОЖНОСТЬ|'
+            'Время|ВРЕМЯ|'
+            'Порций|ПОРЦИЙ'
         )
 
     @staticmethod
@@ -26,31 +29,36 @@ class ServerFunctions(object):
             find_ = re.findall('[\d]+|Топ|ТОП|топ', first_word)
             if len(find_) == 0:
                 split_for_keywords = re.split(self.keywords, recipe)
-                if len(split_for_keywords) == 3:
-                    checked_list.append(recipe)
-        return self._no_dupl(checked_list)
+                if len(split_for_keywords) == 6:
+                    checked_list.append(split_for_keywords)
+        return checked_list
 
     @staticmethod
     def _no_dupl(list_):
-        list_no_dupl = []
-        for elem in list_:
-            list_line = ' '.join(elem.split())
-            list_no_dupl.append(list_line)
-        return list(set(list_no_dupl))
+        cook_list = []
+        no_dupl = []
+        for recipe in list_:
+            cook_list.append(recipe['cook'])
+        for cook in cook_list:
+            if cook not in no_dupl:
+                index = cook_list.index(cook)
+                no_dupl.append(list_[index])
+        return no_dupl
 
     def _get_recipe_title(self, recipes_list):
         reg = re.compile('^[А-ЯЁЙ].[а-яё,\-\s\d]+')
         recipes_title = []
         for recipe in recipes_list:
-            recipe_title = re.findall(reg, recipe)
+            recipe_title = re.findall(reg, recipe[0])
             if len(recipe_title) == 0:
-                recipe_title = (re.split(self.keywords, recipe))
+                recipe_title = (re.split(self.keywords, recipe[0]))
             if len(recipe_title) != 0:
                 recipes_title.append(' '.join(recipe_title[0].split()))
             else:
                 recipes_title.append('')
         return recipes_title
 
+    # RETURN FUCKING JSON ONLY
     def _parse_to_json(self, title_list, recipes_list):
         recipes_untitle = []
         for recipe in recipes_list:
@@ -61,8 +69,11 @@ class ServerFunctions(object):
         for count in range(0, list_len):
             recipes_content_dict['id ' + str(count)] = {
                 'title': title_list[count],
-                'ing': recipes_untitle[count][0],
-                'cook': recipes_untitle[count][1]
+                'ing': recipes_untitle[count][1],
+                'hard': recipes_untitle[count][2],
+                'time': recipes_untitle[count][3],
+                'port': recipes_untitle[count][4],
+                'cook': recipes_untitle[count][5],
             }
         recipe_content_json = json.dumps(
             recipes_content_dict,
@@ -71,24 +82,32 @@ class ServerFunctions(object):
         )
         return recipe_content_json
 
+    # IT'S USED
     def _parse_to_json_list(self, title_list, recipes_list):
-        recipes_untitle = []
-        for recipe in recipes_list:
-            recipe_content = re.split(self.keywords, recipe)
-            recipes_untitle.append([recipe_content[1], recipe_content[2]])
-
+        recipes_untitle = recipes_list
         json_list = []
         list_len = len(title_list)
         for count in range(0, list_len):
             json_list.append(
                 {
                     'id': count,
-                    'title': title_list[count],
-                    'ing': recipes_untitle[count][0],
-                    'cook': recipes_untitle[count][1]
+                    'title': self._fix_elem(title_list[count]),
+                    'hard': self._clear_json_elem(recipes_untitle[count][1]),
+                    'time': self._clear_json_elem(recipes_untitle[count][2]),
+                    'porth': self._clear_json_elem(recipes_untitle[count][3]),
+                    'ing': self._fix_elem(recipes_untitle[count][4]),
+                    'cook': self._fix_elem(recipes_untitle[count][5]),
                 }
             )
-        return json_list
+        return self._no_dupl(json_list)
+
+    @staticmethod
+    def _clear_json_elem(elem):
+        return re.findall('[\w\d]+', elem)[0]
+
+    @staticmethod
+    def _fix_elem(elem):
+        return ' '.join(elem.split())
 
     def preprocessing_recipe_text(self):
         recipes_list_text = self._get_recipes()

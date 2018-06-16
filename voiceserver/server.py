@@ -1,19 +1,23 @@
-from voiceserver import app, mail
+from voiceserver import app
 from flask import request
 from voiceserver.server_funcs import ServerFunctions
 from voiceserver.db_funcs import DBFuncs
 import json
-from flask_mail import Message
 
 
 class Server(object):
-    def __init__(self, query=None, reg_data=None):
+    def __init__(self, query=None, reg_data=None, auth=None):
         self.query = query
+        self.auth = auth
         if reg_data:
             json_data = json.loads(reg_data)
             self.login = json_data['login']
             self.password = json_data['password']
             self.email = json_data['email']
+        if auth:
+            json_data = json.loads(auth)
+            self.login = json_data['login']
+            self.password = json_data['password']
 
     def request_to_vk(self):
         get_server = ServerFunctions(self.query)
@@ -29,6 +33,14 @@ class Server(object):
         set_reg = new_user.check_in()
         return set_reg
 
+    def auth_user(self):
+        auth = DBFuncs(
+            self.login,
+            self.password,
+            None
+        )
+        return auth.auth_user()
+
 
 @app.route('/recipes/<recipe_name>')
 def get_request(recipe_name=None):
@@ -43,17 +55,11 @@ def check_in():
         return server.set_registration()
 
 
-@app.route('/sendcode/<email>/<code>')
-def send_confirm_code(email, code):
-    msg = Message('Confirmation code to VoiceRecipes',
-                  recipients=[email])
-    msg.html = "<p>Hello! We are glad to welcome you in VoiceRecipes! " \
-               "Your confirmation code: %s</p>" % code
-    try:
-        mail.send(msg)
-        return 'ok'
-    except:
-        pass
+@app.route('/auth', methods=['POST'])
+def auth_user():
+    if request.method == 'POST':
+        server = Server(auth=request.data)
+        return server.auth_user()
 
 
 if __name__ == '__main__':
