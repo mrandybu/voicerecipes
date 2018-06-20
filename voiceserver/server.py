@@ -6,9 +6,10 @@ import json
 
 
 class Server(object):
-    def __init__(self, query=None, reg_data=None, auth=None):
+    def __init__(self, query=None, reg_data=None, auth=None, save_data=None):
         self.query = query
         self.auth = auth
+        self.save_data = save_data
         if reg_data:
             json_data = json.loads(reg_data)
             self.login = json_data['login']
@@ -41,6 +42,10 @@ class Server(object):
         )
         return auth.auth_user()
 
+    def save_recipe(self):
+        save = DBFuncs(None, None, None, self.save_data)
+        return save.save_recipe()
+
 
 @app.route('/recipes/<recipe_name>')
 def get_request(recipe_name=None):
@@ -60,6 +65,13 @@ def auth_user():
     if request.method == 'POST':
         server = Server(auth=request.data)
         return server.auth_user()
+
+
+@app.route('/saverecipe')
+def save_recipe():
+    if request.method == 'POST':
+        server = Server(save_data=request.data)
+        return server
 
 
 if __name__ == '__main__':

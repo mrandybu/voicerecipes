@@ -1,4 +1,4 @@
-from database.orm_db import User, db
+from database.orm_db import db, User, Recipe, UsersRecipes
 import hashlib
 import uuid
 import re
@@ -9,10 +9,11 @@ import smtplib
 
 
 class DBFuncs(object):
-    def __init__(self, login, password, email):
+    def __init__(self, login, password, email, save_data=None):
         self.login = login
         self.password = password
         self.email = email
+        self.save_data = save_data
         self.confirm_code = random.randrange(1000, 10000)
         self.subfile = __root__.get_root_path_to_file('subfile.json')
 
@@ -72,6 +73,28 @@ class DBFuncs(object):
         except:
             return _jd(request_json['serv_err'])
 
+    def save_recipe(self):
+        request_json = self.requests_json()
+        save_data = json.load(self.save_data)
+        user_id = User.query.filter_by(login=save_data['login']).first().id
+        recipe = Recipe(title=save_data['title'],
+                        ingredients=save_data['ing'],
+                        cook=save_data['cook'],
+                        time=save_data['time'],
+                        hard=save_data['hard'])
+        try:
+            db.session.add(recipe)
+            db.session.commit()
+        except:
+            return _jd(request_json['save_err'])
+        users_recipes = UsersRecipes(user_id=user_id, recipe_id=recipe.id)
+        try:
+            db.session.add(users_recipes)
+            db.session.commit()
+        except:
+            return _jd(request_json['serv_err'])
+        return _jd(request_json['save_ok'])
+
     @staticmethod
     def requests_json(arg=None):
         request_json = {
@@ -98,7 +121,13 @@ class DBFuncs(object):
             },
             'serv_err': {
                 'request': 'server err'
-            }
+            },
+            'save_err': {
+                'request': 'save err'
+            },
+            'save_ok': {
+                'request': 'save ok'
+            },
         }
         return request_json
 
