@@ -75,7 +75,7 @@ class DBFuncs(object):
 
     def save_recipe(self):
         request_json = self.requests_json()
-        save_data = json.load(self.save_data)
+        save_data = json.loads(self.save_data)
         user_id = User.query.filter_by(login=save_data['login']).first().id
         recipe = Recipe(title=save_data['title'],
                         ingredients=save_data['ing'],

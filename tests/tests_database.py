@@ -70,6 +70,23 @@ class TestDataBase(object):
             return req.text
         return 'Error method..('
 
+    def test_save_recipe(self):
+        with open(self.subfile) as sbf:
+            host = json.load(sbf)['server']
+        url = os.path.join(host, 'saverecipe')
+        save_data = {
+            'login': 'test',
+            'title': 'Test title',
+            'ing': 'Test ingredients',
+            'cook': 'Test cook',
+            'time': 'Test time',
+            'hard': 'Test hard',
+        }
+        req = requests.post(url, json.dumps(save_data))
+        if req.ok:
+            return req.text
+        return 'Error method..('
+
     @staticmethod
     def get_all_data():
         return User.query.all()
@@ -83,12 +100,13 @@ class TestDataBase(object):
             'remail': self.test_send_code_remote,
             'authloc': self.test_auth_local,
             'authrem': self.test_auth_rem,
+            'saverec': self.test_save_recipe,
         }
         return tests_kit[self.test_type]()
 
 
 def init_test():
-    test = TestDataBase('locreg')
+    test = TestDataBase('saverec')
     return test.get_test()
 
 

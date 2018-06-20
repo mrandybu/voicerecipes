@@ -67,11 +67,11 @@ def auth_user():
         return server.auth_user()
 
 
-@app.route('/saverecipe')
+@app.route('/saverecipe', methods=['POST'])
 def save_recipe():
     if request.method == 'POST':
         server = Server(save_data=request.data)
-        return server
+        return server.save_recipe()
 
 
 if __name__ == '__main__':
